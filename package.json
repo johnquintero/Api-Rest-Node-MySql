@@ -1,0 +1,27 @@
+{
+  "name": "apiprimo",
+  "version": "1.0.0",
+  "description": "api rest services primo",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "author": "John Quintero",
+  "license": "ISC",
+  "dependencies": {
+    "ajv": "^6.12.4",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "helmet": "^4.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.1.0",
+    "sequelize": "^6.3.5",
+    "sequelize-json-schema": "^2.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4",
+    "sequelize-auto": "^0.5.4",
+    "sequelize-cli": "^6.2.0"
+  }
+}
