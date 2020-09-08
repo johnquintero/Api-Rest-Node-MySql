@@ -4,12 +4,17 @@ const sjs = require('sequelize-json-schema');
 const db = require('../db/index');
 const Ajv = require('ajv');
 const Usuario = db.Usuario;
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('../config/config.json').development;
 
 
 
+//OBTENER TODOS LOS USUARIOS
 router.get('/', usuarioController.index);
 
-router.post('/', (req, res)=>{
+//CREAR UN NUEVO USUARIO
+router.post('/', async (req, res)=>{
     //Utilizo sequelize-json-schema para poder validar lo que llega en el req
     //defino en opcions los campos que no necesito validar del schema
     const options = {exclude: ['IDUSUARIO', 'INTNUMINTENTOS', 'BITACTIVO','INTTIPOUSUARIO']};
@@ -27,21 +32,45 @@ router.post('/', (req, res)=>{
 
     var nuevoUsuario = Usuario.build({
         STRUSUARIO : req.body.STRUSUARIO,
-        STRPASSWORD : req.body.STRPASSWORD,
+        STRPASSWORD : bcrypt.hashSync(req.body.STRPASSWORD,10),
         INTNUMINTENTOS : 1,
         BITACTIVO : 1,
         INTTIPOUSUARIO : 10
     });
 
-    usuarioController.newUser(nuevoUsuario)
+    await usuarioController.newUser(nuevoUsuario)
         .then(res =>{
             res.status(201);
         })
         .catch(err => {
             console.log(`Error newUser: ${err}`);
-            res.status(500).send('Se ha presentado un error');
+            res.status(409).send({ message: 'Se ha presentado un error', error: err.errors[0].message });
         });
     //res.status(200).send('ok');
-})
+});
+
+//VALIDACION DE USUARIO Y GENERACION DE TOKEN
+router.get('/login', async (req, res)=>{
+    await usuarioController.login(req.body.STRUSUARIO)
+        .then(userdb => {
+            if (bcrypt.compareSync(req.body.STRPASSWORD,userdb.STRPASSWORD)){
+                const payload = {
+                    check : true,
+                    user : userdb.STRUSUARIO
+                }
+                const token = jwt.sign(payload, config.llave,{ expiresIn : '5m'});
+                res.json({
+                    mensaje: 'Autenticación correcta',
+                    token: token
+                });
+            }
+            res.send('Informacion incorrecta');
+        })
+        .catch(err =>{
+            res.status(409).send({ message: 'Se ha presentado un error' });
+        });
+});
+
+
 
 module.exports = router;

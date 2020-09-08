@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const config = require('./config/config.json').development;
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const middlewares = require('./middlewares/verifica-token.js');
 
 const app = express();
 
@@ -41,29 +42,29 @@ app.post('/autenticar', (req, res) => {
 })
 
 //Validacion del token
-const verificaToken = express.Router();
+//const verificaToken = express.Router();
 
-verificaToken.use((req, res,next)=>{
-    const token = req.headers['access-token'];
-    if(token){
-        jwt.verify(token,app.get('llave'),(err, decoded)=>{
-            if(err){
-                return res.json({ message : 'Invalid Token'});
-            }
-            else {
-                req.decoded = decoded;
-                next();
-            }
-        });
-    }
-    else {
-        res.send({ message : 'Token no enviada'});
-    }
-});
+// verificaToken.use((req, res,next)=>{
+//     const token = req.headers['access-token'];
+//     if(token){
+//         jwt.verify(token,app.get('llave'),(err, decoded)=>{
+//             if(err){
+//                 return res.json({ message : 'Invalid Token'});
+//             }
+//             else {
+//                 req.decoded = decoded;
+//                 next();
+//             }
+//         });
+//     }
+//     else {
+//         res.send({ message : 'Token no enviada'});
+//     }
+// });
 
 
 //Routes
-app.use('/api', verificaToken, ROUTER_INDEX);
+app.use('/api',middlewares.verificaToken, ROUTER_INDEX);
 
 
 module.exports =  app;

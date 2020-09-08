@@ -14,7 +14,7 @@ module.exports = function(sequelize, DataTypes) {
       unique: true
     },
     STRPASSWORD: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     INTNUMINTENTOS: {

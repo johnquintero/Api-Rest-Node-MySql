@@ -3,7 +3,7 @@ const config = require('../config/config.json')
 const usuarioRoute = require('../usuario/usuario');
 
 //routes features
-router.use('/usuario', usuarioRoute);
+router.use('/usuario',usuarioRoute);
 
 
 
