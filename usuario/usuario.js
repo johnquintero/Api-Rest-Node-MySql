@@ -13,6 +13,8 @@ const config = require('../config/config.json').development;
 //OBTENER TODOS LOS USUARIOS
 router.get('/', usuarioController.index);
 
+router.get('/:userid', usuarioController.fndUser);
+
 //CREAR UN NUEVO USUARIO
 router.post('/', async (req, res)=>{
     //Utilizo sequelize-json-schema para poder validar lo que llega en el req
@@ -26,7 +28,7 @@ router.post('/', async (req, res)=>{
 
     var valid = ajv.validate(UserSchema,req.body);
     if(!valid) {
-        console.log(ajv.errors);
+        // console.log(ajv.errors);
         res.status(400).send({ params : ajv.errors[0].params, message : ajv.errors[0].message });
     }
 
@@ -39,37 +41,60 @@ router.post('/', async (req, res)=>{
     });
 
     await usuarioController.newUser(nuevoUsuario)
-        .then(res =>{
-            res.status(201);
+        .then( () =>{
+            res.status(201).json({ status : 'success', message : 'User created'});
         })
         .catch(err => {
-            console.log(`Error newUser: ${err}`);
-            res.status(409).send({ message: 'Se ha presentado un error', error: err.errors[0].message });
+            // console.log(`Error newUser: ${err}`);
+            // if (err.errors.length >  0) {
+                return res.status(409).send({ message: 'Se ha presentado un error', error: err.errors[0].message });
+            // }
+            // return res.status(409).send({ message: 'Se ha presentado un error', error: err });
+
         });
     //res.status(200).send('ok');
 });
 
-//VALIDACION DE USUARIO Y GENERACION DE TOKEN
-router.get('/login', async (req, res)=>{
-    await usuarioController.login(req.body.STRUSUARIO)
-        .then(userdb => {
-            if (bcrypt.compareSync(req.body.STRPASSWORD,userdb.STRPASSWORD)){
-                const payload = {
-                    check : true,
-                    user : userdb.STRUSUARIO
-                }
-                const token = jwt.sign(payload, config.llave,{ expiresIn : '5m'});
-                res.json({
-                    mensaje: 'Autenticación correcta',
-                    token: token
-                });
+router.delete('/:user', async (req, res)=>{
+    await usuarioController.delUser(req.params.user)
+        .then(data => {
+            if (data === 0) {
+                return res.status(200).send({ status : 'success', message : 'User not exist'});
             }
-            res.send('Informacion incorrecta');
+            res.status(200).send({ status : 'success', message : 'User deleted'});
         })
-        .catch(err =>{
-            res.status(409).send({ message: 'Se ha presentado un error' });
-        });
+        .catch(err => {
+            console.log('entro al error');
+            res.status(500).send(err);
+        })
 });
+
+router.put('/:userid', async (req, res) =>{
+    await usuarioController.updUser(req.body,req.params.userid)
+        .then(data => {
+            console.log(data);
+            res.status(200).send({ status : 'success', message : 'User updated'});
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send(err);
+        })
+});
+
+
+router.patch('/:userid', async (req, res) =>{
+    await usuarioController.updUser2(req.body,req.params.userid)
+        .then(data => {
+            console.log(data);
+            res.status(200).send({ status : 'success', message : 'User updated'});
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send(err);
+        })
+});
+
+
 
 
 

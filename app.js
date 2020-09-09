@@ -5,12 +5,8 @@ const helmet = require('helmet');
 const config = require('./config/config.json').development;
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const middlewares = require('./middlewares/verifica-token.js');
 
 const app = express();
-
-//recupero la llave del archivo de configuracion
-app.set('llave', config.llave);
 
 //MIDDLEWARES
 app.use(cors());
@@ -23,23 +19,23 @@ app.use(helmet());
 
 
 //Autenticacion y generacion de token
-app.post('/autenticar', (req, res) => {
-    if(req.body.usuario === "primo" && req.body.contrasena === "primoapi") {
-        const payload = {
-            check:  true,
-            user: req.body.usuario
-        };
-        const token = jwt.sign(payload, app.get('llave'), {
-            //expiresIn: '20s'
-        });
-        res.json({
-            mensaje: 'Autenticación correcta',
-            token: token
-        });
-    } else {
-        res.json({ mensaje: "Usuario o contraseña incorrectos"})
-    }
-})
+// app.post('/autenticar', (req, res) => {
+//     if(req.body.usuario === "primo" && req.body.contrasena === "primoapi") {
+//         const payload = {
+//             check:  true,
+//             user: req.body.usuario
+//         };
+//         const token = jwt.sign(payload, app.get('llave'), {
+//             //expiresIn: '20s'
+//         });
+//         res.json({
+//             mensaje: 'Autenticación correcta',
+//             token: token
+//         });
+//     } else {
+//         res.json({ mensaje: "Usuario o contraseña incorrectos"})
+//     }
+// })
 
 //Validacion del token
 //const verificaToken = express.Router();
@@ -64,7 +60,7 @@ app.post('/autenticar', (req, res) => {
 
 
 //Routes
-app.use('/api',middlewares.verificaToken, ROUTER_INDEX);
+app.use('/api', ROUTER_INDEX);
 
 
 module.exports =  app;
